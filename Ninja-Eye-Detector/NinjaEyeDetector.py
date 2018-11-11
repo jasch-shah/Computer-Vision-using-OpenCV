@@ -1,0 +1,61 @@
+import numpy as np
+import cv2
+
+# Load Cascade Classifier file
+face_cascade = cv2.CascadeClassifier("mallick_haarcascade_frontalface_default.xml")
+
+
+#Specifying minimum and maximum size parameters
+MIN_FACE_SIZE = 100
+MAX_FACE_SIZE = 300
+
+#Create VideoCapture object
+cap = cv2.VideoCapture(0)
+
+#Check if camera is opened successfully
+if(cap.isOpened() == False):
+	print("Unable to read camera feed")
+
+
+while(True):
+	#Reading each frame
+	ret, frameBig = cap.read()
+
+	#If opened successfully
+	if ret == True:
+
+		# Fixing scaling factor
+		scale = 640.0/frameBig.shape[1]
+
+		# Resizing the image
+		frame = cv2.resize(frameBig,None,fx = scale, fy = scale, interpolation = cv2.INTER_LINEAR)
+
+		#Covert to grayscale
+		frameGray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+		# Detect faces
+		#faces = face_cascade.detectMultiScale(frameGray, scaleFactor = 1.1, minNeighbor = 5, flags = 0, minSize = (MIN_FACE_SIZE,MIN_FACE_SIZE), maxSixe = (MAX_FACE_SIZE,MAX_FACE_SIZE))
+		faces = face_cascade.detectMultiScale(frameGray, scaleFactor=1.1, minNeighbors=5,flags=0, minSize=(MIN_FACE_SIZE,MIN_FACE_SIZE),maxSize=(MAX_FACE_SIZE,MAX_FACE_SIZE))
+
+		#Loop over detected faces
+		for i in xrange (0, len(faces)):
+			x, y, width, height = faces[i];
+
+			# calculating dimensions params for eyes 
+			ex,ey,ewidth,eheight = int(x + 0.125*width), int(y + 0.25 * height), int(0.75 * width), int(0.25 * height)
+
+			cv2.rectangle(frame, (ex,ey),(ex+ewidth,ey+eheight),(128,255,0), 2) 
+
+			cv2.imshow('Ninja Eye Detector', frame)
+
+			key = cv2.waitKey(1)
+
+			if (key == 27):
+				break
+
+			else:
+				break
+
+cap.release()
+
+cv2.destroyAllWindows()
